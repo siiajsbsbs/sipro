@@ -13,6 +13,23 @@ Bahasa produk & komunikasi: **Indonesia**.
 - Kredensial uji: `/app/memory/test_credentials.md` (sandi demo `Sipro#2026`).
 
 ## Riwayat implementasi (terbaru di atas)
+### 31 Agu 2026 (lanjutan) — combobox kaitan + tombol Buat tugas di halaman record + RBAC hide menu
+- `RelatedRecordCombobox.js` (Popover+cmdk): record kaitan di dialog Tugas Baru bisa DICARI;
+  filter hanya pada label (value `label||id`, uuid tidak mencemari pencarian); limit endpoint
+  dinaikkan (leads 300, units 500, customers 300, deals 200, projects 100).
+- `CreateTaskDialog.js`: cache record dibuang tiap dialog dibuka (data baru muncul tanpa
+  reload) + refetch jenis tersisa saat reopen; prop `preset {type,id,label}` + `triggerLabel`.
+- Tombol "Buat tugas" (gated `can('work_tasks','create')`) di `/units/:id`, `/customers/:id`,
+  `/projects/:id` — kaitan otomatis terisi.
+- RBAC: sidebar kini disaring izin EFEKTIF — item nav diberi `resource`, `buildNavGroups(role,
+  can)`; pencabutan izin di /admin/permissions benar-benar menyembunyikan menunya (perlu login
+  ulang). AdminPermissions: tombol baru "Kembalikan ke bawaan" (batalkan pencabutan TERSIMPAN;
+  backend GET /admin/permissions kirim `defaults`), "Batalkan suntingan" untuk undo belum
+  tersimpan; label checkbox editor tidak terpotong.
+- Testing agent iteration_112 (2 bug HIGH ditemukan → diperbaiki) + iteration_113 (100% pass).
+- Catatan: gate `validate_compliance` gagal BAWAAN repo (`engine.py` 817 > 800 baris) — bukan
+  dari perubahan sesi ini.
+
 ### 31 Agu 2026 — pemulihan repo + penutup fitur "Kaitan Selain Lead" (temuan iteration_111)
 - Repo di-clone ulang ke container baru: `backend/.env` dipulihkan (`JWT_SECRET`,
   `PORTAL_MASTER_OTP`, `DEFAULT_ORG_ID`), `REACT_APP_BACKEND_URL` disetel ke preview pod ini,

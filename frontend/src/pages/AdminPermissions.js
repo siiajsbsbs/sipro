@@ -150,6 +150,25 @@ export default function AdminPermissions() {
     });
   };
 
+  /** Kembalikan sel ke NILAI BAWAAN KODE (bukan ke nilai tersimpan). Tanpa ini pencabutan
+   *  yang SUDAH disimpan tidak bisa dibatalkan dari layar: `resetCell` hanya menyalin
+   *  `server.matrix` yang kini justru berisi pencabutan itu, sehingga tombol Simpan tidak
+   *  pernah aktif dan admin terpaksa mencentang ulang satu-satu. */
+  const restoreDefault = (resource, role) => {
+    setDraft((prev) => {
+      const next = { ...prev, [resource]: { ...(prev[resource] || {}) } };
+      const def = server?.defaults?.[resource] || {};
+      if (Object.prototype.hasOwnProperty.call(def, role)) {
+        next[resource][role] = [...(def[role] || [])];
+      } else {
+        // Bawaan tidak menulis baris untuk peran ini — hapus kuncinya supaya warisan
+        // peran / tambahan kode hidup kembali.
+        delete next[resource][role];
+      }
+      return next;
+    });
+  };
+
   const changes = useMemo(() => {
     if (!server || !draft) return [];
     const out = [];
@@ -343,7 +362,7 @@ export default function AdminPermissions() {
 
                         {isOpen ? (
                           <div data-testid={ADMIN.permsEditor}
-                            className="mt-2 rounded-lg border bg-background p-2 shadow-sm">
+                            className="mt-2 min-w-[260px] rounded-lg border bg-background p-2 shadow-sm">
                             <p className="mb-1.5 text-[11px] font-medium">
                               {roleLabel(role)} · <span className="font-mono">{res}</span>
                             </p>
@@ -367,7 +386,7 @@ export default function AdminPermissions() {
                                           disabled={blocked}
                                           checked={checkedList.includes(a)}
                                           onChange={() => toggle(res, role, a)} />
-                                        <span>{ACTION_LABEL[a] || a}</span>
+                                        <span className="whitespace-nowrap">{ACTION_LABEL[a] || a}</span>
                                         {fromCode ? (
                                           <span className="rounded border border-sky-300 bg-sky-50 px-1 text-[8px] uppercase text-sky-700">
                                             kode
@@ -386,11 +405,20 @@ export default function AdminPermissions() {
                                   </p>
                                 ) : null}
                                 <div className="mt-2 flex items-center justify-between gap-2">
-                                  <button type="button" data-testid={ADMIN.permsCellReset}
-                                    onClick={() => resetCell(res, role)}
-                                    className="text-[11px] font-medium text-primary hover:underline">
-                                    Kembalikan sel ini
-                                  </button>
+                                  <div className="flex items-center gap-2.5">
+                                    <button type="button" data-testid={ADMIN.permsCellReset}
+                                      onClick={() => resetCell(res, role)}
+                                      title="Buang suntingan yang belum disimpan pada sel ini"
+                                      className="text-[11px] font-medium text-primary hover:underline">
+                                      Batalkan suntingan
+                                    </button>
+                                    <button type="button" data-testid={ADMIN.permsCellDefault}
+                                      onClick={() => restoreDefault(res, role)}
+                                      title="Kembalikan sel ini ke izin bawaan kode (termasuk membatalkan pencabutan yang sudah tersimpan)"
+                                      className="text-[11px] font-medium text-primary hover:underline">
+                                      Kembalikan ke bawaan
+                                    </button>
+                                  </div>
                                   <button type="button" data-testid={ADMIN.permsCellClose}
                                     onClick={() => setOpenCell(null)}
                                     className="text-[11px] text-muted-foreground hover:underline">

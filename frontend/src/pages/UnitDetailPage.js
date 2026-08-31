@@ -18,6 +18,7 @@ import EmptyState from "@/components/patterns/EmptyState";
 import UnitBuildTab from "@/components/build/UnitBuildTab";
 import UnitHandoverTab from "@/components/handover/UnitHandoverTab";
 import PermitCoveragePanel from "@/components/permits/PermitCoveragePanel";
+import CreateTaskDialog from "@/components/work/CreateTaskDialog";
 import { LoadingCards, ErrorState } from "@/components/patterns/StateViews";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/services/apiClient";
@@ -105,20 +106,29 @@ export default function UnitDetailPage() {
           u.corner ? { label: "Posisi", value: "Hook / sudut" } : null,
           u.excess_land_m2 ? { label: "Kelebihan tanah", value: `${u.excess_land_m2} m²` } : null,
         ]}
-        actions={canManage ? (
+        actions={(
           <>
-            <Button data-testid={MASTERPLAN.unitEditOpen} size="sm" variant="secondary"
-              onClick={() => setEdit({ price: u.price || "",
-                excess_land_m2: u.excess_land_m2 ?? "",
-                excess_land_price_agreed: u.excess_land_price_agreed ?? "", reason: "" })}>
-              <Pencil className="mr-1.5 h-4 w-4" /> Ubah unit
-            </Button>
-            <Button data-testid={MASTERPLAN.unitBlockOpen} size="sm" variant="outline"
-              onClick={() => setBlockForm({ blocked: !blocked, reason: "" })}>
-              <Ban className="mr-1.5 h-4 w-4" /> {blocked ? "Buka blokir" : "Blokir unit"}
-            </Button>
+            {can("work_tasks", "create") ? (
+              <CreateTaskDialog triggerLabel="Buat tugas" triggerVariant="outline"
+                preset={{ type: "unit", id,
+                  label: `${u.code || id}${data?.block?.code ? ` — Blok ${data.block.code}` : ""}` }} />
+            ) : null}
+            {canManage ? (
+              <>
+                <Button data-testid={MASTERPLAN.unitEditOpen} size="sm" variant="secondary"
+                  onClick={() => setEdit({ price: u.price || "",
+                    excess_land_m2: u.excess_land_m2 ?? "",
+                    excess_land_price_agreed: u.excess_land_price_agreed ?? "", reason: "" })}>
+                  <Pencil className="mr-1.5 h-4 w-4" /> Ubah unit
+                </Button>
+                <Button data-testid={MASTERPLAN.unitBlockOpen} size="sm" variant="outline"
+                  onClick={() => setBlockForm({ blocked: !blocked, reason: "" })}>
+                  <Ban className="mr-1.5 h-4 w-4" /> {blocked ? "Buka blokir" : "Blokir unit"}
+                </Button>
+              </>
+            ) : null}
           </>
-        ) : null} />
+        )} />
 
       <Tabs value={tab} onValueChange={setTab} className="space-y-4">
         <TabsList className="flex-wrap">

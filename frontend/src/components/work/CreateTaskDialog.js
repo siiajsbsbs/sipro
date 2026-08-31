@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import RelatedRecordCombobox from "@/components/work/RelatedRecordCombobox";
 import api from "@/services/apiClient";
 import { WORK } from "@/constants/testIds";
 import { useReference } from "@/context/ReferenceContext";
@@ -24,19 +25,20 @@ import { useReference } from "@/context/ReferenceContext";
  * sehingga supervisor tidak punya cara menugaskan pekerjaan di luar jobdesk otomatis.
  */
 const REL_TYPES = [
-  { value: "lead", label: "Lead", endpoint: "/leads?limit=100&sort=created_at&direction=desc",
+  { value: "lead", label: "Lead", endpoint: "/leads?limit=300&sort=created_at&direction=desc",
     toLabel: (r) => `${r.name}${r.phone ? ` — ${r.phone}` : ""}` },
-  { value: "deal", label: "Deal / Booking", endpoint: "/deals?limit=100",
+  { value: "deal", label: "Deal / Booking", endpoint: "/deals?limit=200",
     toLabel: (r) => `${r.lead_name || "Deal"}${r.price ? ` — Rp ${Number(r.price).toLocaleString("id-ID")}` : ""}` },
-  { value: "unit", label: "Unit", endpoint: "/units?limit=200",
+  { value: "unit", label: "Unit", endpoint: "/units?limit=500",
     toLabel: (r) => `${r.code || r.no || r.id}${r.block ? ` — Blok ${r.block}` : ""}` },
-  { value: "customer", label: "Customer", endpoint: "/customers?limit=100",
+  { value: "customer", label: "Customer", endpoint: "/customers?limit=300",
     toLabel: (r) => `${r.name}${r.email ? ` — ${r.email}` : ""}` },
-  { value: "project", label: "Proyek", endpoint: "/projects?limit=50",
+  { value: "project", label: "Proyek", endpoint: "/projects?limit=100",
     toLabel: (r) => `${r.name}${r.code ? ` (${r.code})` : ""}` },
 ];
 
-export default function CreateTaskDialog({ division, onDone }) {
+export default function CreateTaskDialog({ division, onDone, preset = null,
+  triggerLabel = "Tugas Baru", triggerVariant = "default" }) {
   const { options } = useReference();
   const [open, setOpen] = useState(false);
   const [members, setMembers] = useState([]);
@@ -59,7 +61,30 @@ export default function CreateTaskDialog({ division, onDone }) {
     } catch { /* biarkan kosong; form tetap bisa dipakai ad-hoc */ }
   }, [division]);
 
-  useEffect(() => { if (open) load(); }, [open, load]);
+  const fetchRecords = useCallback(async (type) => {
+    try {
+      const cfg = REL_TYPES.find((r) => r.value === type);
+      const res = await api.get(cfg.endpoint);
+      setRelRecords((c) => ({ ...c, [type]: res.data.data || [] }));
+    } catch { setRelRecords((c) => ({ ...c, [type]: [] })); }
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    // Cache dibuang setiap dialog dibuka: record yang baru dibuat di tempat lain harus
+    // langsung muncul tanpa memuat ulang halaman.
+    setRelRecords({});
+    load();
+    if (preset?.type) {
+      setForm((f) => ({ ...f, rel_type: preset.type, rel_id: preset.id || "" }));
+      fetchRecords(preset.type);
+    } else if (form.rel_type) {
+      // Jenis kaitan tersisa dari sesi dialog sebelumnya (dibatalkan) — muat ulang
+      // recordnya, kalau tidak combobox-nya kosong selamanya.
+      fetchRecords(form.rel_type);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, load, fetchRecords]);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -79,16 +104,10 @@ export default function CreateTaskDialog({ division, onDone }) {
     }));
   };
 
-  const pickRelType = async (v) => {
+  const pickRelType = (v) => {
     const type = v === "none" ? "" : v;
     setForm((f) => ({ ...f, rel_type: type, rel_id: "" }));
-    if (type && !relRecords[type]) {
-      try {
-        const cfg = REL_TYPES.find((r) => r.value === type);
-        const res = await api.get(cfg.endpoint);
-        setRelRecords((c) => ({ ...c, [type]: res.data.data || [] }));
-      } catch { setRelRecords((c) => ({ ...c, [type]: [] })); }
-    }
+    if (type && !relRecords[type]) fetchRecords(type);
   };
 
   const submit = async () => {
@@ -120,8 +139,8 @@ export default function CreateTaskDialog({ division, onDone }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" data-testid={WORK.createTaskBtn}>
-          <Plus className="mr-1.5 h-4 w-4" /> Tugas Baru
+        <Button size="sm" variant={triggerVariant} data-testid={WORK.createTaskBtn}>
+          <Plus className="mr-1.5 h-4 w-4" /> {triggerLabel}
         </Button>
       </DialogTrigger>
       <DialogContent className="bg-background">
@@ -175,21 +194,15 @@ export default function CreateTaskDialog({ division, onDone }) {
                   ))}
                 </SelectContent>
               </Select>
-              <Select value={form.rel_id || undefined} disabled={!form.rel_type}
-                onValueChange={(v) => set("rel_id", v)}>
-                <SelectTrigger data-testid={WORK.createTaskRelatedRecord}>
-                  <SelectValue placeholder={form.rel_type ? "Pilih record" : "Pilih jenis dulu"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {(relRecords[form.rel_type] || []).map((r) => {
-                    const cfg = REL_TYPES.find((c) => c.value === form.rel_type);
-                    return <SelectItem key={r.id} value={r.id}>{cfg.toLabel(r)}</SelectItem>;
-                  })}
-                  {form.rel_type && (relRecords[form.rel_type] || []).length === 0 ? (
-                    <div className="px-2 py-1.5 text-xs text-muted-foreground">Tidak ada data.</div>
-                  ) : null}
-                </SelectContent>
-              </Select>
+              <RelatedRecordCombobox
+                records={relRecords[form.rel_type] || []}
+                value={form.rel_id}
+                onChange={(v) => set("rel_id", v)}
+                toLabel={(REL_TYPES.find((c) => c.value === form.rel_type) || {}).toLabel}
+                disabled={!form.rel_type}
+                placeholder={form.rel_type ? "Pilih record" : "Pilih jenis dulu"}
+                fallbackLabel={preset && preset.id === form.rel_id ? preset.label : null}
+              />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">

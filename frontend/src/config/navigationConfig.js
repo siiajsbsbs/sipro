@@ -104,25 +104,27 @@ export const NAV_STRUCTURE = [
   {
     type: "group", groupId: "work", label: "Kerja", roles: ALL,
     items: [
-      { id: "tasks", label: "Tugas & Papan Divisi", icon: ListChecks, path: "/tasks", roles: ALL },
+      { id: "tasks", label: "Tugas & Papan Divisi", icon: ListChecks, path: "/tasks", roles: ALL,
+        resource: "work_tasks" },
       { id: "notifications", label: "Notifikasi", icon: Bell, path: "/notifications", roles: ALL },
     ],
   },
   {
     type: "group", groupId: "crm", label: "CRM", roles: SALES_SIDE,
     items: [
-      { id: "leads", label: "Pipeline Lead", icon: UserPlus, path: "/leads", roles: SALES_SIDE },
+      { id: "leads", label: "Pipeline Lead", icon: UserPlus, path: "/leads", roles: SALES_SIDE,
+        resource: "leads" },
       { id: "appointments", label: "Agenda & Survey", icon: CalendarDays, path: "/appointments",
-        roles: SALES_SIDE },
+        roles: SALES_SIDE, resource: "appointments" },
       { id: "customers", label: "Customer & Kontrak", icon: Users2, path: "/customers",
-        roles: SALES_SIDE },
+        roles: SALES_SIDE, resource: "customers" },
       { id: "inbox", label: "Percakapan (WA)", icon: MessagesSquare, path: "/inbox",
-        roles: SALES_SIDE },
+        roles: SALES_SIDE, resource: "inbox" },
       // Fase 42 — menu dibuka: master mitra + aturan fee + tagihan fee + atribusi + analitik.
       // "Marketing Fee" tidak lagi menjadi baris sidebar sendiri; ia hidup sebagai tab
       // "Tagihan Fee" di dalam hub ini (rute /marketing-fee tetap ada sebagai alias).
       { id: "partners", label: "Mitra & Fee", icon: Handshake, path: "/partners",
-        roles: uniq(SALES_SIDE, MARKETING_FEE_SIDE) },
+        roles: uniq(SALES_SIDE, MARKETING_FEE_SIDE), resource: "partners" },
     ],
   },
   {
@@ -132,21 +134,22 @@ export const NAV_STRUCTURE = [
     type: "group", groupId: "marketing", label: "Marketing", roles: ADS_SIDE,
     items: [
       { id: "automation", label: "Automasi & Channel", icon: Workflow, path: "/automation",
-        roles: OMNI_SIDE },
+        roles: OMNI_SIDE, resource: "automation_rules" },
       { id: "campaigns", label: "Kampanye & Biaya Iklan", icon: Megaphone, path: "/campaigns",
-        roles: ADS_SIDE },
+        roles: ADS_SIDE, resource: "ads" },
       { id: "attribution", label: "Atribusi & CAPI", icon: Target, path: "/attribution",
-        roles: OMNI_SIDE },
+        roles: OMNI_SIDE, resource: "ads" },
     ],
   },
   {
     type: "group", groupId: "project", label: "Proyek", roles: SITEPLAN_SIDE,
     items: [
       { id: "projects", label: "Master Proyek", icon: Building2, path: "/projects",
-        roles: PROJECT_SIDE },
-      { id: "build", label: "Pembangunan", icon: HardHat, path: "/build", roles: PROJECT_SIDE },
+        roles: PROJECT_SIDE, resource: "projects" },
+      { id: "build", label: "Pembangunan", icon: HardHat, path: "/build", roles: PROJECT_SIDE,
+        resource: "construction" },
       { id: "materials", label: "Material & Opname", icon: Boxes, path: "/materials",
-        roles: PROJECT_SIDE },
+        roles: PROJECT_SIDE, resource: "materials" },
       { id: "site-plan", label: "Site Plan", icon: MapIcon, path: "/site-plan",
         roles: SITEPLAN_SIDE },
     ],
@@ -154,47 +157,50 @@ export const NAV_STRUCTURE = [
   {
     type: "group", groupId: "procurement", label: "Pengadaan", roles: PROCUREMENT_SIDE,
     items: [
-      { id: "boq", label: "RAB / BoQ", icon: Calculator, path: "/boq", roles: PROCUREMENT_SIDE },
+      { id: "boq", label: "RAB / BoQ", icon: Calculator, path: "/boq", roles: PROCUREMENT_SIDE,
+        resource: "boq" },
       { id: "subcon", label: "Subkontraktor & SPK", icon: Wrench, path: "/subcon",
-        roles: PROCUREMENT_SIDE },
+        roles: PROCUREMENT_SIDE, resource: "subcon" },
       { id: "procurement", label: "Pengadaan & Vendor", icon: ShoppingCart, path: "/procurement",
-        roles: PROCUREMENT_SIDE },
+        roles: PROCUREMENT_SIDE, resource: "procurement" },
     ],
   },
   {
     type: "group", groupId: "finance", label: "Keuangan", roles: ALL,
     items: [
       { id: "finance", label: "AR / AP / Komisi", icon: Wallet, path: "/finance",
-        roles: FINANCE_SIDE },
-      { id: "petty-cash", label: "Kas Bon", icon: Coins, path: "/petty-cash", roles: ALL },
+        roles: FINANCE_SIDE, resource: "finance" },
+      { id: "petty-cash", label: "Kas Bon", icon: Coins, path: "/petty-cash", roles: ALL,
+        resource: "petty_cash" },
     ],
   },
   {
     type: "group", groupId: "accounting", label: "Akuntansi", roles: FINANCE_SIDE,
     items: [
       { id: "accounting", label: "Buku Besar & Jurnal", icon: BookOpen, path: "/accounting",
-        roles: FINANCE_SIDE },
+        roles: FINANCE_SIDE, resource: "gl" },
       { id: "accounting-reports", label: "Laporan Keuangan", icon: Scale,
-        path: "/accounting/reports", roles: FINANCE_SIDE },
+        path: "/accounting/reports", roles: FINANCE_SIDE, resource: "gl" },
       { id: "fixed-assets", label: "Aset Tetap", icon: Building, path: "/fixed-assets",
-        roles: FINANCE_SIDE },
+        roles: FINANCE_SIDE, resource: "fixed_assets" },
       { id: "corp-financing", label: "Pembiayaan Korporat", icon: Banknote,
-        path: "/corporate-financing", roles: FINANCE_SIDE },
-      { id: "tax", label: "Perpajakan", icon: Landmark, path: "/tax", roles: FINANCE_SIDE },
+        path: "/corporate-financing", roles: FINANCE_SIDE, resource: "loans" },
+      { id: "tax", label: "Perpajakan", icon: Landmark, path: "/tax", roles: FINANCE_SIDE,
+        resource: "tax" },
     ],
   },
   {
     type: "group", groupId: "service", label: "Layanan", roles: SALES_SIDE,
     items: [
       { id: "complaints", label: "Komplain & CS", icon: Headset, path: "/complaints",
-        roles: SALES_SIDE },
+        roles: SALES_SIDE, resource: "complaints" },
     ],
   },
   {
     type: "group", groupId: "docs", label: "Dokumen", roles: DOCS_SIDE,
     items: [
       { id: "documents", label: "Dokumen & Perizinan", icon: FileText, path: "/documents",
-        roles: DOCS_SIDE },
+        roles: DOCS_SIDE, resource: "documents" },
     ],
   },
   {
@@ -203,7 +209,8 @@ export const NAV_STRUCTURE = [
       // Fase 44: DIBUKA. Lima dashboard persona + kamus metrik, semuanya dihitung dari data
       // operasional yang sama (lapisan `backend/metrics`), dengan aturan kejujuran angka:
       // metrik yang datanya belum ada menulis "belum ada data", tidak pernah 0.
-      { id: "bi", label: "Analitik & BI", icon: BarChart3, path: "/bi", roles: ALL },
+      { id: "bi", label: "Analitik & BI", icon: BarChart3, path: "/bi", roles: ALL,
+        resource: "analytics" },
     ],
   },
   {
@@ -226,22 +233,29 @@ export const NAV_STRUCTURE = [
 ];
 
 /**
- * buildNavGroups(role) — grup + item yang boleh dilihat peran ini.
+ * buildNavGroups(role, can) — grup + item yang boleh dilihat peran ini.
+ *
+ * Fase RBAC-nav: bila `can` (dari `useAuth`) diberikan, item yang punya `resource` juga
+ * diperiksa terhadap izin EFEKTIF (`can(resource, "view")`). Dengan ini pencabutan izin di
+ * layar Hak Akses benar-benar MENYEMBUNYIKAN menunya, bukan hanya membuat halamannya 403.
+ * Tanpa `can` (mis. audit gate) perilaku lama berbasis peran tetap berlaku.
  *
  * Item "Segera Hadir" TETAP DI GRUP ASALNYA (tidak lagi dikumpulkan ke satu grup di dasar
  * sidebar). Alasannya UX: pemakai perlu tahu DI MANA fitur itu akan muncul ("Kampanye ada
  * di Marketing"), dan grup asalnya adalah satu-satunya tempat yang menjawab itu. Grup yang
  * seluruh isinya belum jadi tetap ditampilkan supaya peta jalannya jujur.
  */
-export function buildNavGroups(role) {
+export function buildNavGroups(role, can = null) {
+  const visible = (it) => it.roles.includes(role)
+    && (!can || !it.resource || can(it.resource, "view"));
   const result = [];
   for (const entry of NAV_STRUCTURE) {
     if (!entry.roles.includes(role)) continue;
     if (entry.type === "standalone") {
-      result.push(entry);
+      if (visible(entry)) result.push(entry);
       continue;
     }
-    const roleItems = entry.items.filter((it) => it.roles.includes(role));
+    const roleItems = entry.items.filter(visible);
     if (roleItems.length) result.push({ ...entry, items: roleItems });
   }
   return result;

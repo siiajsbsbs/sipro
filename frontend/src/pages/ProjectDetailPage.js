@@ -9,6 +9,7 @@ import StructureTab from "@/components/projects/StructureTab";
 import TargetSummaryCard from "@/components/budget/TargetSummaryCard";
 import PermitCoveragePanel from "@/components/permits/PermitCoveragePanel";
 import UnitsTab from "@/components/projects/UnitsTab";
+import CreateTaskDialog from "@/components/work/CreateTaskDialog";
 import { LoadingCards, ErrorState } from "@/components/patterns/StateViews";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/services/apiClient";
@@ -64,7 +65,12 @@ export default function ProjectDetailPage() {
           { label: "Blok", value: tree?.totals?.blocks || 0 },
           { label: "Unit", value: tree?.totals?.units || 0 },
           { label: "Progres konstruksi", value: `${project.construction_progress || 0}%` },
-        ]} />
+        ]}
+        actions={can("work_tasks", "create") ? (
+          <CreateTaskDialog triggerLabel="Buat tugas" triggerVariant="outline"
+            preset={{ type: "project", id,
+              label: `${project.name || id}${project.code ? ` (${project.code})` : ""}` }} />
+        ) : null} />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard label="Unit tersedia" value={stats.available || 0} tone="emerald" />

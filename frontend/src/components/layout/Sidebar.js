@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import { Building2, Lock, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { buildNavGroups } from "@/config/navigationConfig";
 import NavMigrationDialog from "@/components/layout/NavMigrationDialog";
+import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import { NAV, HUB } from "@/constants/testIds";
 
@@ -56,7 +57,11 @@ function NavItem({ item, collapsed }) {
 }
 
 export default function Sidebar({ role, onNavigate, collapsed = false, onToggle }) {
-  const groups = buildNavGroups(role);
+  // Menu disaring dengan izin EFEKTIF (bukan hanya peran): pencabutan akses di layar
+  // Hak Akses langsung menyembunyikan pintunya. Saat izin belum termuat (bootstrap),
+  // saringan izin dilewati agar sidebar tidak berkedip kosong.
+  const { can, permsKnown } = useAuth();
+  const groups = buildNavGroups(role, permsKnown ? can : null);
   return (
     <aside
       data-testid={NAV.sidebar}

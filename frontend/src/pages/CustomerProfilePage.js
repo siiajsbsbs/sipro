@@ -17,11 +17,13 @@ import CustomerSummaryTab from "@/components/customers/CustomerSummaryTab";
 import CustomerFinancingTab from "@/components/customers/CustomerFinancingTab";
 import CustomerContractTab from "@/components/customers/CustomerContractTab";
 import CustomerPaymentPlanTab from "@/components/customers/CustomerPaymentPlanTab";
+import CreateTaskDialog from "@/components/work/CreateTaskDialog";
 import {
   CustomerUnitsTab, CustomerComplaintsTab,
 } from "@/components/customers/CustomerRelatedTabs";
 import { LoadingCards, ErrorState, PanelStateView } from "@/components/patterns/StateViews";
 import api from "@/services/apiClient";
+import { useAuth } from "@/context/AuthContext";
 import { honestBadge, loadPanels, omittedSources, panelRows } from "@/utils/panelLoad";
 import { CUSTPROFILE, PANELSTATE } from "@/constants/testIds";
 
@@ -66,6 +68,7 @@ const PANEL_LABELS = {
 export default function CustomerProfilePage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { can } = useAuth();
   const [state, setState] = useState({ loading: true, error: "" });
   const [cust, setCust] = useState(null);
   const [panels, setPanels] = useState({});
@@ -182,7 +185,12 @@ export default function CustomerProfilePage() {
         { label: "Penghasilan", value: <MoneyText value={cust.monthly_income} short /> },
         { label: "Unit", value: countChip(panels.units, units) },
         { label: "KPR", value: countChip(panels.financing, fins) },
-      ]} />
+      ]}
+      actions={can("work_tasks", "create") ? (
+        <CreateTaskDialog triggerLabel="Buat tugas" triggerVariant="outline"
+          preset={{ type: "customer", id,
+            label: `${cust.name || id}${cust.email ? ` — ${cust.email}` : ""}` }} />
+      ) : null} />
   );
 
   return (
