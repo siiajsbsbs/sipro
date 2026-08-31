@@ -18,7 +18,9 @@ export default function EntityHeader({
   const navigate = useNavigate();
   return (
     <div data-testid={testId}
-      className="space-y-3 rounded-lg border bg-card p-4 shadow-sm">
+      className="relative space-y-3 overflow-hidden rounded-xl border bg-card p-4 shadow-[var(--shadow-raised)]">
+      <div aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-primary/50 to-transparent" />
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
           <div className="flex items-center gap-2">
@@ -38,13 +40,16 @@ export default function EntityHeader({
         {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
       </div>
       {chips.length ? (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-stretch gap-2">
           {chips.filter(Boolean).map((c, i) => (
             <span key={`${c.label}-${i}`}
-              className={cn("inline-flex items-center gap-1.5 rounded-md border bg-secondary",
-                "px-2 py-1 text-xs")}>
-              <span className="text-muted-foreground">{c.label}</span>
-              <span className="font-medium text-foreground">{c.value}</span>
+              className={cn("inline-flex min-w-[5.5rem] flex-col justify-center gap-0.5",
+                "rounded-lg border border-border/80 bg-background px-2.5 py-1.5",
+                "shadow-[var(--shadow-card)]")}>
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                {c.label}
+              </span>
+              <span className="text-xs font-medium text-foreground">{c.value}</span>
             </span>
           ))}
         </div>

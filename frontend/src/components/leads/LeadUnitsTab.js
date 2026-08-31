@@ -137,7 +137,7 @@ export default function LeadUnitsTab({
       ) : (
         <EmptyState icon={Handshake} title="Belum ada unit dipegang"
           description={mayReserve
-            ? "Buat reservasi untuk mengunci unit bagi lead ini (batas reservasi per lead ditegakkan Fase 42)."
+            ? "Buat reservasi untuk mengunci unit bagi lead ini (batas reservasi per lead ditegakkan otomatis)."
             : "Lead ini belum memegang unit apa pun."}
           actionLabel={mayReserve ? "Buat Reservasi" : ""}
           onAction={mayReserve ? () => setOpen(true) : null} />

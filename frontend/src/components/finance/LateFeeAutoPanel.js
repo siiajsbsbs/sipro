@@ -63,7 +63,7 @@ export default function LateFeeAutoPanel() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="eyebrow flex items-center gap-1.5">
-            <AlarmClock className="h-3.5 w-3.5" /> Fase 68
+            <AlarmClock className="h-3.5 w-3.5" /> Otomatis
           </p>
           <h3 className="section-title">Denda Keterlambatan Terjadwal</h3>
           <p data-testid={T.autoRule} className="page-desc mt-1 text-xs">

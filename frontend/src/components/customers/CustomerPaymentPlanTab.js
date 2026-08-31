@@ -194,8 +194,23 @@ function DealPlan({ deal, plan, late, onChanged }) {
                   {r.no || r.receipt_no || "Kuitansi"} · {formatDateWIB(r.created_at || r.date)}
                   {r.method ? ` · ${r.method}` : ""}
                 </span>
-                <span className="font-semibold tabular-nums">
-                  <MoneyText value={r.amount} />
+                <span className="flex items-center gap-2">
+                  <span className="font-semibold tabular-nums">
+                    <MoneyText value={r.amount} />
+                  </span>
+                  <button type="button" data-testid="plan-receipt-pdf"
+                    className="inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:underline"
+                    onClick={async () => {
+                      try {
+                        const res = await api.get(`/finance/ar/receipts/${r.id}/pdf`,
+                          { responseType: "blob" });
+                        const href = URL.createObjectURL(res.data);
+                        window.open(href, "_blank");
+                        setTimeout(() => URL.revokeObjectURL(href), 30000);
+                      } catch { /* peran tanpa akses finance */ }
+                    }}>
+                    <Receipt className="h-3 w-3" /> Kwitansi PDF
+                  </button>
                 </span>
               </li>
             ))}
@@ -251,10 +266,10 @@ export default function CustomerPaymentPlanTab({ customer }) {
       <p className="mt-1">
         Jadwal termin, penerimaan berbukti, sisa kewajiban, dan tunggakan di bawah adalah data
         nyata dari Keuangan. <b>Toleransi keterlambatan &amp; denda</b> kini dijalankan mesin
-        yang sama dengan penagihan (Fase 58): termin yang lewat tanggal tetapi masih di dalam
+        yang sama dengan penagihan: termin yang lewat tanggal tetapi masih di dalam
         tenggang kontrak <b>tidak</b> disebut menunggak, dan denda yang ditagihkan{" "}
         <b>berjurnal</b> serta bisa diringankan Manajer Keuangan dengan alasan tertulis.
-        Pembatalan &amp; pengembalian dana <b>sudah berjurnal</b> (Fase 56): diajukan Manajer
+        Pembatalan &amp; pengembalian dana <b>sudah berjurnal</b>: diajukan Manajer
         Sales dari tab <b>Kontrak &amp; Legal</b>, diputus Manajer Keuangan, dan dibayar dari
         kas/bank — daftarnya ada di <b>Keuangan → Pembatalan &amp; Refund</b>.
       </p>

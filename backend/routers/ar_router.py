@@ -155,3 +155,92 @@ async def bast(deal_id: str, user: dict = Depends(require_permission("finance", 
         raise HTTPException(status_code=404, detail="Deal tidak ditemukan")
     rev = await fe.recognize_revenue(deal, org_id=org, actor=user.get("email"))
     return {"data": serialize_doc(rev)}
+
+
+# ----------------------- Bukti tertulis booking: invoice & kwitansi (PDF) -----------------------
+def _idr(v) -> str:
+    return f"Rp {int(v or 0):,}".replace(",", ".")
+
+
+def _ref_label(group: str, value):
+    try:
+        return ref.label_of(group, value) or value or "-"
+    except KeyError:
+        return value or "-"
+
+
+@router.get("/receipts/{rid}/pdf")
+async def receipt_pdf(rid: str, user: dict = Depends(require_permission("finance", "view"))):
+    """Kwitansi resmi (PDF ber-kop) untuk staf — bukti penerimaan booking fee/termin."""
+    from fastapi.responses import Response
+    import doc_layout as dl
+    from pdf_utils import build_document_pdf
+    from db import ORG_NAME
+    org = user.get("org_id", ORG_ID)
+    doc = await db.receipts.find_one({"id": rid, "org_id": org}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Kwitansi tidak ditemukan.")
+    deal = await db.deals.find_one({"id": doc.get("deal_id"), "org_id": org}, {"_id": 0}) or {}
+    alokasi = "; ".join(f"{a.get('label')}: {_idr(a.get('amount'))}"
+                        for a in (doc.get("allocations") or [])) or "-"
+    isi = "\n".join([
+        f"Nomor kwitansi : {doc.get('receipt_no') or doc.get('id')}",
+        f"Tanggal : {str(doc.get('created_at'))[:10]}",
+        f"Diterima dari : {deal.get('lead_name') or deal.get('customer_name') or '-'}",
+        f"Unit : {doc.get('unit_code') or deal.get('unit_code') or '-'}",
+        f"Jumlah : {_idr(doc.get('amount'))}",
+        f"Cara bayar : {_ref_label('payment_method', doc.get('method'))}",
+        f"Dialokasikan ke : {alokasi}",
+        f"Catatan : {doc.get('note') or '-'}",
+        "",
+        "Kwitansi ini sah sebagai bukti penerimaan pembayaran dan dicetak dari sistem.",
+    ])
+    layout = await dl.get_layout(org, "KWITANSI")
+    pdf = build_document_pdf(title="Kwitansi Penerimaan Pembayaran",
+                             doc_number=doc.get("receipt_no") or doc.get("id"),
+                             content=isi, signatures=None, org_name=ORG_NAME, layout=layout,
+                             images=await dl.images(org, layout))
+    name = str(doc.get("receipt_no") or "kwitansi").replace("/", "-")
+    return Response(content=pdf, media_type="application/pdf",
+                    headers={"Content-Disposition": f'inline; filename="{name}.pdf"'})
+
+
+@router.get("/{deal_id}/invoice/pdf")
+async def invoice_pdf(deal_id: str, user: dict = Depends(require_permission("finance", "view"))):
+    """Invoice/tagihan resmi (PDF ber-kop): jadwal termin + sudah dibayar + sisa."""
+    from fastapi.responses import Response
+    import doc_layout as dl
+    from pdf_utils import build_table_pdf
+    from db import ORG_NAME
+    org = user.get("org_id", ORG_ID)
+    inv = await db.ar_invoices.find_one({"org_id": org, "deal_id": deal_id}, {"_id": 0})
+    if not inv:
+        raise HTTPException(status_code=404, detail=(
+            "Belum ada jadwal tagihan untuk transaksi ini — buat jadwal AR dulu."))
+    deal = await db.deals.find_one({"id": deal_id, "org_id": org}, {"_id": 0}) or {}
+    rows = []
+    for it in inv.get("items", []):
+        rows.append([
+            it.get("label") or "-",
+            str(it.get("due_date") or "-")[:10],
+            _idr(it.get("amount")),
+            _idr(it.get("paid")),
+            _ref_label("ar_status", it.get("status")),
+        ])
+    layout = await dl.get_layout(org, "LAPORAN")
+    subtitle = " · ".join(filter(None, [
+        f"Pembeli: {deal.get('lead_name') or deal.get('customer_name') or '-'}",
+        f"Unit: {deal.get('unit_code') or '-'}",
+        f"Status: {_ref_label('ar_status', inv.get('status'))}",
+        f"Sudah dibayar: {_idr(inv.get('paid'))}",
+        f"Sisa: {_idr(inv.get('outstanding'))}",
+    ]))
+    pdf = build_table_pdf(title="Invoice / Tagihan Pembayaran Unit", subtitle=subtitle,
+                          columns=["Termin", "Jatuh tempo", "Jumlah", "Dibayar", "Status"],
+                          rows=rows, total_row=["TOTAL", "", _idr(inv.get("total")),
+                                                _idr(inv.get("paid")), ""],
+                          org_name=ORG_NAME, layout=layout,
+                          images=await dl.images(org, layout))
+    name = f"invoice-{(deal.get('unit_code') or deal_id).replace('/', '-')}"
+    return Response(content=pdf, media_type="application/pdf",
+                    headers={"Content-Disposition": f'inline; filename="{name}.pdf"'})

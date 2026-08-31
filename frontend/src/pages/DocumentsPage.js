@@ -1,8 +1,9 @@
 import React from "react";
-import { FileText, Stamp } from "lucide-react";
+import { FilePlus2, FileText, Stamp } from "lucide-react";
 
 import TabPage from "@/components/patterns/TabPage";
 import DocumentsListTab from "@/components/documents/DocumentsListTab";
+import DocumentIssueHub from "@/components/documents/DocumentIssueHub";
 import PermitsPage from "@/pages/PermitsPage";
 import EmptyState from "@/components/patterns/EmptyState";
 import { LoadingCards } from "@/components/patterns/StateViews";
@@ -27,6 +28,8 @@ export default function DocumentsPage() {
   const canPermits = can("permits", "view");
 
   const tabs = [
+    ...(canDocs && can("contracts", "view") ? [{ key: "terbitkan", label: "Terbitkan Dokumen",
+      icon: FilePlus2, content: <DocumentIssueHub /> }] : []),
     ...(canDocs ? [{ key: "dokumen", label: "Dokumen Transaksi", icon: FileText,
       content: <DocumentsListTab /> }] : []),
     ...(canPermits ? [{ key: "perizinan", label: "Perizinan", icon: Stamp,

@@ -202,7 +202,7 @@ async def _claim_awaiting_ack(org: str, unit: dict) -> dict:
     claim = await we.create_claim(
         org, unit_id=unit["id"], category="struktur",
         title="Rembes pada sambungan sloof samping",
-        description=("Data DEMO Fase 51C — perbaikan sudah selesai dan lulus pemeriksaan "
+        description=("Data DEMO — perbaikan sudah selesai dan lulus pemeriksaan "
                      "mutu; tinggal menunggu PENGAKUAN pembeli di portal."),
         source="portal_pembeli", actor="seed")
     cid = claim["id"]

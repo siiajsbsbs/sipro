@@ -20,7 +20,7 @@ export function ExecutiveDashboard({ params }) {
           description: "Σ kuitansi penerimaan — uang yang sudah benar-benar diterima." },
         { code: "SLS-06", title: "Piutang jatuh tempo per ember umur" },
         { code: "BGT-04", title: "Pencapaian target unit per proyek",
-          description: "Dibandingkan dengan target AKTIF; realisasi dibaca dari deal yang benar-benar tercatat (Fase 45)." },
+          description: "Dibandingkan dengan target AKTIF; realisasi dibaca dari deal yang benar-benar tercatat." },
         { code: "PRJ-04", title: "Realisasi terhadap RAB per kategori" },
       ]} />
   );
@@ -83,7 +83,7 @@ export function ProjectCostDashboard({ params }) {
         { code: "PRJ-02", title: "Keterlambatan per unit" },
         { code: "PRJ-03", title: "Realisasi RAB per kategori" },
         { code: "BGT-02", title: "Exposure anggaran per proyek",
-          description: "Exposure = realisasi + komitmen. Dipakai untuk peringatan dini sebelum tagihannya masuk (Fase 45)." },
+          description: "Exposure = realisasi + komitmen. Dipakai untuk peringatan dini sebelum tagihannya masuk." },
         { code: "BGT-03", title: "Item anggaran overbudget" },
         { code: "PRJ-09", title: "Komitmen belum tertagih per vendor" },
       ]} />

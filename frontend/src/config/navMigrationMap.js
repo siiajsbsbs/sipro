@@ -63,7 +63,7 @@ export const NAV_MIGRATION = [
     why: "Pengeluaran kas berada satu grup dengan keuangan lain." },
   { old: "Marketing Fee", now: "CRM › Mitra & Fee → tab “Tagihan Fee”",
     to: "/partners?hub=tagihan",
-    why: "Tagihan fee tidak berdiri sendiri: ia lahir dari aturan fee mitra (Fase 42). "
+    why: "Tagihan fee tidak berdiri sendiri: ia lahir dari aturan fee mitra. "
       + "Rute /marketing-fee tetap hidup sebagai alias." },
   { old: "Master Agen", now: "CRM › Mitra & Fee → tab “Master Mitra”",
     to: "/partners?hub=mitra",

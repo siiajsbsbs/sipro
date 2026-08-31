@@ -163,7 +163,7 @@ async def _handover_inspection(org: str, unit: dict, marker: str) -> dict:
         "id": new_id(), "org_id": org, "project_id": unit.get("project_id"),
         "unit_id": unit["id"], "phase_id": None,
         "inspection_number": f"QC/DEMO50/{str(unit.get('code') or '')[-4:]}",
-        "category": "handover", "title": "Inspeksi serah terima (data demo Fase 50)",
+        "category": "handover", "title": "Inspeksi serah terima (data demo)",
         "items": [
             {"key": "atap", "label": "Atap & plafon tidak bocor", "result": "pass",
              "note": "Diperiksa saat hujan buatan."},
@@ -197,7 +197,7 @@ async def _ready_unit(org: str, taken: set) -> dict:
     if not prior:
         await db.units.update_one({"id": unit["id"], "org_id": org},
                                   {"$set": {"demo_batch": BATCH, "demo_marker": READY_MARKER}})
-    await _buyer_and_payment(org, unit, "Ibu Ratna Demo (Fase 50)", "+6281250000501",
+    await _buyer_and_payment(org, unit, "Ibu Ratna Demo", "+6281250000501",
                              READY_MARKER, _days_ago(120))
     await _handover_inspection(org, unit, f"{READY_MARKER}_qc")
     return {"unit_id": unit["id"], "code": unit.get("code")}
@@ -215,7 +215,7 @@ async def _handed_over_unit(org: str, taken: set) -> dict:
         await db.units.update_one({"id": unit["id"], "org_id": org},
                                   {"$set": {"demo_batch": BATCH, "demo_marker": DONE_MARKER}})
     day = _days_ago(400)
-    await _buyer_and_payment(org, unit, "Bapak Hendra Demo (Fase 50)", "+6281250000502",
+    await _buyer_and_payment(org, unit, "Bapak Hendra Demo", "+6281250000502",
                              DONE_MARKER, _days_ago(430))
     await _handover_inspection(org, unit, f"{DONE_MARKER}_qc")
 
@@ -223,7 +223,7 @@ async def _handed_over_unit(org: str, taken: set) -> dict:
     if not handover:
         handover = await ho.issue(
             org, unit["id"], "seed", handed_over_at=day,
-            received_by="Bapak Hendra Demo (Fase 50)",
+            received_by="Bapak Hendra Demo",
             note=("Data DEMO Fase 50 — rumah diserahkan 400 hari lalu supaya masa garansi "
                   "finishing sudah lewat sementara struktur masih aktif."),
             meter_air="0148", meter_listrik="7742", keys_handed=3)

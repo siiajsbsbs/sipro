@@ -174,7 +174,7 @@ export default function UnitDetailPage() {
                   </div>
                 ))}
                 <p className="text-xs text-muted-foreground">
-                  Add-on dipilih resmi saat reservasi/booking (Fase 42) dan menjadi komponen
+                  Add-on dipilih resmi saat reservasi/booking dan menjadi komponen
                   terpisah di kontrak & keuangan.
                 </p>
               </div>
